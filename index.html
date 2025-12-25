@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LE COMPTOIR - Assistant Diagnostic & Conseil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white">
+    <div id="app"></div>
+
+    <script>
+        const diagnosticData = [
+            { brand: "Bosch", appliance: "Lave-linge", errorCode: "E16 / F16", symptom: "Porte non verrouillée", cause: "Loquet de porte mal fermé", solution: "Fermez fermement la porte, retirez tout linge coincé, puis redémarrez l'appareil.", level: "Utilisateur", time: 5 },
+            { brand: "Bosch", appliance: "Lave-linge", errorCode: "E17 / F17", symptom: "Problème de vidange", cause: "Pompe ou tuyau bloqué", solution: "Nettoyez le filtre de vidange, vérifiez que le tuyau n'est pas plié, puis relancez.", level: "Utilisateur", time: 10 },
+            { brand: "Bosch", appliance: "Lave-vaisselle", errorCode: "E15", symptom: "Fuite détectée", cause: "Eau dans le bac de base", solution: "Coupez l'eau et l'électricité. Penchez l'appareil pour vider le bac. Contactez-nous.", level: "Technicien", time: 20 },
+            { brand: "Bosch", appliance: "Lave-vaisselle", errorCode: "E24", symptom: "Défaut de vidange", cause: "Filtre ou pompe obstrué", solution: "Nettoyez le filtre au fond de l'appareil et vérifiez le tuyau de vidange.", level: "Utilisateur", time: 10 },
+            { brand: "Samsung", appliance: "Lave-linge", errorCode: "5E / 5C", symptom: "Problème de vidange", cause: "Pompe ou filtre bouché", solution: "Nettoyez la pompe et le filtre, vérifiez le tuyau de vidange.", level: "Utilisateur", time: 10 },
+            { brand: "LG", appliance: "Lave-linge", errorCode: "SUD", symptom: "Excès de mousse", cause: "Trop de lessive", solution: "Lancez un cycle de rinçage. Utilisez une lessive HE et respectez les dosages.", level: "Utilisateur", time: 5 }
+        ];
+
+        let state = {
+            view: 'home',
+            brand: '',
+            appliance: '',
+            error: '',
+            diagnosis: null,
+            notFound: false
+        };
+
+        function render() {
+            const app = document.getElementById('app');
+            
+            if (state.view === 'home') {
+                app.innerHTML = getHomeHTML();
+            } else if (state.view === 'repair') {
+                app.innerHTML = getRepairHTML();
+            } else if (state.view === 'buy') {
+                app.innerHTML = getBuyHTML();
+            }
+        }
+
+        function getHomeHTML() {
+            return `
+                <div class="bg-black border-b border-gray-700">
+                    <div class="max-w-6xl mx-auto px-6 py-6 text-center">
+                        <h1 class="text-5xl font-bold mb-3">LE COMPTOIR</h1>
+                        <div class="h-px bg-gray-600 w-64 mx-auto mb-3"></div>
+                        <p class="text-xl text-gray-300 mb-2">VALLON-EN-SULLY</p>
+                        <div class="h-px bg-gray-600 w-48 mx-auto mb-4"></div>
+                        <p class="text-2xl font-bold text-red-500 mb-4">04-70-51-00-02</p>
+                        <p class="text-sm text-gray-400 uppercase">LE CONSEIL - L'INSTALLATION - LA RÉPARATION</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 border-b border-gray-700 py-4">
+                    <div class="max-w-6xl mx-auto px-6 text-center text-sm text-gray-300">
+                        <p>📍 10 bis rue Jean Jaurès, 03190 Vallon-en-Sully</p>
+                        <p class="mt-2">🏆 <strong>LABEL QUALIRÉPAR</strong> • PARTENAIRE PULSAT</p>
+                    </div>
+                </div>
+
+                <div class="max-w-6xl mx-auto px-6 py-12">
+                    <div class="bg-gradient-to-r from-amber-600 to-amber-700 rounded-lg p-6 mb-12 text-center">
+                        <p class="text-2xl font-bold text-white mb-1">BONUS RÉPARATION QUALIRÉPAR</p>
+                        <p class="text-lg text-amber-100">Jusqu'à 60€ déduits immédiatement</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-8 mb-12">
+                        <button onclick="goToRepair()" class="bg-slate-800 hover:bg-slate-700 border-2 border-gray-600 hover:border-red-500 rounded-lg p-10 transition-all">
+                            <div class="text-6xl mb-4">🔧</div>
+                            <h2 class="text-2xl font-bold mb-4">MON APPAREIL EST EN PANNE</h2>
+                            <p class="text-gray-400">Diagnostic gratuit</p>
+                        </button>
+
+                        <button onclick="goToBuy()" class="bg-slate-800 hover:bg-slate-700 border-2 border-gray-600 hover:border-red-500 rounded-lg p-10 transition-all">
+                            <div class="text-6xl mb-4">🛒</div>
+                            <h2 class="text-2xl font-bold mb-4">JE VEUX ACHETER DU NEUF</h2>
+                            <p class="text-gray-400">Conseil personnalisé</p>
+                        </button>
+                    </div>
+
+                    <div class="bg-slate-800 border border-gray-700 rounded-lg p-8 text-center">
+                        <h3 class="text-2xl font-bold mb-6">NOUS SOMMES LÀ POUR VOUS AIDER 😊</h3>
+                        <a href="tel:0470510002" class="inline-block bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded font-bold">
+                            📞 04-70-51-00-02
+                        </a>
+                        <p class="text-gray-400 mt-4">🕐 Lun-Sam : 9h-12h / 14h-19h</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getRepairHTML() {
+            const brands = [...new Set(diagnosticData.map(d => d.brand))].sort();
+            const appliances = state.brand ? [...new Set(diagnosticData.filter(d => d.brand === state.brand).map(d => d.appliance))].sort() : [];
+            const errors = (state.brand && state.appliance) ? diagnosticData.filter(d => d.brand === state.brand && d.appliance === state.appliance) : [];
+
+            if (state.diagnosis) {
+                return getDiagnosisResultHTML();
+            }
+
+            if (state.notFound) {
+                return getNotFoundHTML();
+            }
+
+            return `
+                <div class="bg-black border-b border-gray-700">
+                    <div class="max-w-6xl mx-auto px-6 py-6">
+                        <div class="flex justify-between items-center">
+                            <button onclick="goHome()" class="text-gray-400 hover:text-white">← Retour</button>
+                            <h1 class="text-3xl font-bold">DIAGNOSTIC DE PANNE</h1>
+                            <div class="w-24"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="max-w-4xl mx-auto px-6 py-12">
+                    <div class="bg-slate-800 border border-gray-700 rounded-lg p-8">
+                        <h2 class="text-2xl font-bold mb-6">🔧 Diagnostic gratuit</h2>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block font-bold mb-3 text-gray-300 uppercase text-sm">ÉTAPE 1 : Marque</label>
+                                <select onchange="selectBrand(this.value)" class="w-full p-4 bg-slate-700 border border-gray-600 rounded text-white">
+                                    <option value="">Sélectionnez</option>
+                                    ${brands.map(b => `<option value="${b}" ${b === state.brand ? 'selected' : ''}>${b}</option>`).join('')}
+                                </select>
+                            </div>
+
+                            ${state.brand ? `
+                                <div>
+                                    <label class="block font-bold mb-3 text-gray-300 uppercase text-sm">ÉTAPE 2 : Type d'appareil</label>
+                                    <select onchange="selectAppliance(this.value)" class="w-full p-4 bg-slate-700 border border-gray-600 rounded text-white">
+                                        <option value="">Sélectionnez</option>
+                                        ${appliances.map(a => `<option value="${a}" ${a === state.appliance ? 'selected' : ''}>${a}</option>`).join('')}
+                                    </select>
+                                </div>
+                            ` : ''}
+
+                            ${state.appliance ? `
+                                <div>
+                                    <label class="block font-bold mb-3 text-gray-300 uppercase text-sm">ÉTAPE 3 : Code erreur</label>
+                                    <select onchange="selectError(this.value)" class="w-full p-4 bg-slate-700 border border-gray-600 rounded text-white">
+                                        <option value="">Sélectionnez</option>
+                                        ${errors.map(e => `<option value="${e.errorCode}">${e.errorCode} - ${e.symptom}</option>`).join('')}
+                                        <option value="autre">Autre code</option>
+                                    </select>
+                                </div>
+                            ` : ''}
+
+                            ${state.error ? `
+                                <button onclick="diagnose()" class="w-full bg-red-600 hover:bg-red-700 text-white text-xl font-bold py-4 rounded">
+                                    LANCER LE DIAGNOSTIC
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getDiagnosisResultHTML() {
+            return `
+                <div class="bg-black border-b border-gray-700">
+                    <div class="max-w-6xl mx-auto px-6 py-6">
+                        <div class="flex justify-between items-center">
+                            <button onclick="resetDiagnosis()" class="text-gray-400 hover:text-white">← Retour</button>
+                            <h1 class="text-3xl font-bold">DIAGNOSTIC</h1>
+                            <div class="w-24"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="max-w-4xl mx-auto px-6 py-12 space-y-6">
+                    <div class="bg-slate-800 border-l-4 border-green-500 rounded-lg p-6">
+                        <h3 class="text-2xl font-bold mb-4 text-green-400">✓ Diagnostic identifié</h3>
+                        <p class="text-gray-300 mb-2"><strong>Problème :</strong> ${state.diagnosis.symptom}</p>
+                        <p class="text-gray-300 mb-2"><strong>Cause :</strong> ${state.diagnosis.cause}</p>
+                        <p class="text-gray-400 text-sm">⏱️ Temps estimé : ${state.diagnosis.time} min</p>
+                    </div>
+
+                    <div class="bg-slate-800 border border-gray-700 rounded-lg p-6">
+                        <h4 class="font-bold text-lg mb-4 text-red-500">✔️ SOLUTION</h4>
+                        <p class="text-gray-300 text-lg">${state.diagnosis.solution}</p>
+                        
+                        ${state.diagnosis.level === "Utilisateur" ? `
+                            <div class="bg-green-900 bg-opacity-30 border border-green-700 rounded p-4 mt-4 text-center">
+                                <p class="text-green-400 font-semibold">✓ Vous pouvez essayer vous-même</p>
+                            </div>
+                        ` : `
+                            <div class="bg-amber-900 bg-opacity-30 border border-amber-600 rounded p-4 mt-4 text-center">
+                                <p class="text-amber-400 font-semibold">⚠️ Intervention technicien nécessaire</p>
+                            </div>
+                        `}
+                    </div>
+
+                    <div class="bg-gradient-to-r from-amber-600 to-amber-700 rounded-lg p-6">
+                        <h4 class="text-xl font-bold text-white mb-2">🏆 BONUS QUALIRÉPAR</h4>
+                        <p class="text-white">Réduction immédiate jusqu'à <strong>60€</strong> sur votre réparation !</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <button onclick="resetDiagnosis()" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 rounded">
+                            Nouveau diagnostic
+                        </button>
+                        <a href="tel:0470510002" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded text-center block">
+                            📞 NOUS APPELER
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getNotFoundHTML() {
+            return `
+                <div class="bg-black border-b border-gray-700">
+                    <div class="max-w-6xl mx-auto px-6 py-6">
+                        <button onclick="resetDiagnosis()" class="text-gray-400 hover:text-white">← Retour</button>
+                    </div>
+                </div>
+
+                <div class="max-w-4xl mx-auto px-6 py-12">
+                    <div class="bg-slate-800 border-l-4 border-amber-500 rounded-lg p-8">
+                        <h3 class="text-2xl font-bold mb-4 text-amber-400">Code non répertorié</h3>
+                        <p class="text-gray-300 text-lg mb-6">
+                            Notre équipe se tient à votre disposition pour un diagnostic personnalisé ! 😊
+                        </p>
+                        
+                        <div class="bg-slate-700 rounded-lg p-6 mb-6">
+                            <p class="text-white font-semibold mb-2">Votre appareil :</p>
+                            <p class="text-gray-300">Marque : ${state.brand}</p>
+                            <p class="text-gray-300">Type : ${state.appliance}</p>
+                            <p class="text-gray-300">Code : ${state.error}</p>
+                        </div>
+
+                        <div class="bg-gradient-to-r from-amber-600 to-amber-700 rounded-lg p-6 mb-6">
+                            <h4 class="text-xl font-bold text-white mb-2">🏆 BONUS QUALIRÉPAR</h4>
+                            <p class="text-white">Réduction jusqu'à <strong>60€</strong> !</p>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <a href="tel:0470510002" class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded text-center block">
+                                📞 04-70-51-00-02
+                            </a>
+                            <button onclick="resetDiagnosis()" class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-4 rounded">
+                                Nouveau diagnostic
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getBuyHTML() {
+            return `
+                <div class="bg-black border-b border-gray-700">
+                    <div class="max-w-6xl mx-auto px-6 py-6">
+                        <div class="flex justify-between items-center">
+                            <button onclick="goHome()" class="text-gray-400 hover:text-white">← Retour</button>
+                            <h1 class="text-3xl font-bold">AIDE AU CHOIX</h1>
+                            <div class="w-24"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="max-w-4xl mx-auto px-6 py-12">
+                    <div class="bg-slate-800 border border-gray-700 rounded-lg p-8">
+                        <h2 class="text-2xl font-bold mb-4">🛒 Trouvez l'appareil idéal</h2>
+                        <p class="text-gray-400 mb-8">Nous sommes là pour vous conseiller 😊</p>
+                        
+                        <p class="text-gray-300 text-lg mb-6">
+                            Notre partenaire <strong class="text-purple-400">Pulsat</strong> vous propose un large choix d'appareils.
+                        </p>
+                        
+                        <a href="https://www.pulsat.fr" target="_blank" class="block w-full bg-purple-600 hover:bg-purple-700 text-white font-bold text-xl py-4 rounded text-center mb-8">
+                            🔗 Voir le catalogue Pulsat
+                        </a>
+
+                        <div class="bg-slate-700 border-2 border-red-500 rounded-lg p-6">
+                            <h4 class="font-bold text-xl mb-4 text-center">BESOIN DE CONSEIL ?</h4>
+                            <p class="text-gray-300 mb-6 text-center">Notre équipe vous accompagne</p>
+                            <a href="tel:0470510002" class="block bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded text-center">
+                                📞 04-70-51-00-02
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function goHome() {
+            state = { view: 'home', brand: '', appliance: '', error: '', diagnosis: null, notFound: false };
+            render();
+        }
+
+        function goToRepair() {
+            state.view = 'repair';
+            render();
+        }
+
+        function goToBuy() {
+            state.view = 'buy';
+            render();
+        }
+
+        function selectBrand(brand) {
+            state.brand = brand;
+            state.appliance = '';
+            state.error = '';
+            render();
+        }
+
+        function selectAppliance(appliance) {
+            state.appliance = appliance;
+            state.error = '';
+            render();
+        }
+
+        function selectError(error) {
+            state.error = error;
+            render();
+        }
+
+        function diagnose() {
+            const result = diagnosticData.find(d => 
+                d.brand === state.brand && 
+                d.appliance === state.appliance && 
+                d.errorCode === state.error
+            );
+            
+            if (result) {
+                state.diagnosis = result;
+                state.notFound = false;
+            } else {
+                state.diagnosis = null;
+                state.notFound = true;
+            }
+            render();
+        }
+
+        function resetDiagnosis() {
+            state.diagnosis = null;
+            state.notFound = false;
+            state.brand = '';
+            state.appliance = '';
+            state.error = '';
+            render();
+        }
+
+        render();
+    </script>
+</body>
+</html>
